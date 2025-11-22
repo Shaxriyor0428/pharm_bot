@@ -2,18 +2,18 @@ import asyncio
 from aiogram import Bot, Dispatcher
 from aiogram.client.default import DefaultBotProperties
 from aiogram.fsm.storage.memory import MemoryStorage
-from bot.config.database import init_db, close_db
+# from bot.config.database import init_db, close_db
 from bot.config.env import BOT_TOKEN
 from bot.start_router import router
 
 
-async def on_startup():
-    await init_db()
-    print("✅ Database connected")
-
-async def on_shutdown():
-    await close_db()
-    print("❌ Database closed")
+# async def on_startup():
+#     await init_db()
+#     print("✅ Database connected")
+#
+# async def on_shutdown():
+#     await close_db()
+#     print("❌ Database closed")
 
 
 async def main():
@@ -23,9 +23,9 @@ async def main():
 
     dp.include_router(router)
 
-    # startup & shutdown handlers
-    dp.startup.register(on_startup)
-    dp.shutdown.register(on_shutdown)
+    # # startup & shutdown handlers
+    # dp.startup.register(on_startup)
+    # dp.shutdown.register(on_shutdown)
 
     print("🚀 Bot started successfully!")
     await dp.start_polling(bot)

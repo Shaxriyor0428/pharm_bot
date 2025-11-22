@@ -52,7 +52,7 @@ async def handle_video_note(message: types.Message, state: FSMContext, bot: Bot)
     video_id = message.video_note.file_id
 
     # --- bazaga saqlaymiz ---
-    await create_geo_location(lat, lon, video_id, user)
+    await create_geo_location(lat, lon, video_id, chat_id=message.chat.id)
 
     # --- foydalanuvchiga javob ---
     await message.answer(
@@ -63,7 +63,7 @@ async def handle_video_note(message: types.Message, state: FSMContext, bot: Bot)
     await state.clear()
 
     # --- adminlarga yuboramiz ---
-    admins = await get_all_admins()
+    admins = await get_all_admins(message.chat.id)
     if not admins:
         return
 
