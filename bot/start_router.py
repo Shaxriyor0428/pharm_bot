@@ -65,11 +65,11 @@ async def handle_video_note(message: types.Message, state: FSMContext, bot: Bot)
     # --- adminlarga yuboramiz ---
     admins = await get_all_admins(message.chat.id)
     if not admins:
-        return
+        return None
 
     text = (
         f"🆕 <b>Yangi joylashuv va video!</b>\n\n"
-        f"👤 Foydalanuvchi: {user.first_name + ' ' + user.last_name or user.username}\n"
+        f"👤 Foydalanuvchi: {user["first_name"] + ' ' + user["last_name"] or user["username"]}\n"
         f"📍 Koordinatalar: {lat}, {lon}\n"
         f"🌐 <a href='https://www.google.com/maps?q={lat},{lon}'>Google xaritada ochish</a>"
     )
@@ -78,23 +78,24 @@ async def handle_video_note(message: types.Message, state: FSMContext, bot: Bot)
         try:
             # 1️⃣ Text yuborish
             await bot.send_message(
-                chat_id=admin.chat_id,
+                chat_id=admin["chat_id"],
                 text=text,
                 parse_mode="HTML",
                 disable_web_page_preview=True
             )
 
             # 2️⃣ Video yuborish
-            await message.bot.send_video_note(chat_id=admin.chat_id, video_note=video_id)
+            await bot.send_video_note(chat_id=admin["chat_id"], video_note=video_id)
 
             # 3️⃣ Location yuborish
             await bot.send_location(
-                chat_id=admin.chat_id,
+                chat_id=admin["chat_id"],
                 latitude=lat,
                 longitude=lon
             )
 
         except Exception as e:
-            print(f"⚠️ Admin {admin.id} ga yuborishda xatolik: {e}")
-
-
+            # admin['id'] ishlatish kerak, attribute emas
+            print(f"⚠️ Admin {admin['id']} ga yuborishda xatolik: {e}")
+            # Telegram BadRequest: chat not found bo‘lsa shunchaki davom etadi
+            continue

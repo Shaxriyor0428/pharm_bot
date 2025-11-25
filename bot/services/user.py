@@ -33,6 +33,5 @@ async def get_all_admins(chat_id):
     url = f"{BASE_URL}/users/get_all_admins/?chat_id={chat_id}"
     async with httpx.AsyncClient() as client:
         response = await client.get(url)
-
+    # JSON formatdagi list qaytaramiz
     return response.json()
-
