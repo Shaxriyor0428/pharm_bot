@@ -1,37 +1,26 @@
-from bot.helpers import fetch_dict, fetchrow_dict
+from typing import Any, Optional
+
+from bot.services.api import request_json
 
 
-# async def get_user_by_chat(chat_id):
-#     """Berilgan chat_id bo‘yicha foydalanuvchini qaytaradi."""
-#     return await fetchrow_dict(
-#         "SELECT * FROM users WHERE chat_id = $1",
-#         chat_id
-#     )
-#
-# async def get_all_admins():
-#     """Admin va superadmin foydalanuvchilarni qaytaradi."""
-#     return await fetch_dict(
-#         "SELECT * FROM users WHERE role = ANY($1) AND status = $2",
-#         ["admin", "superadmin"],
-#         "accepted"
-#     )
+async def get_user_by_chat(chat_id: int) -> Optional[dict[str, Any]]:
+    """
+    Berilgan chat_id bo'yicha foydalanuvchini qaytaradi (status'idan qat'i nazar).
+    Ro'yxatdan o'tmagan bo'lsa None.
+
+    /users/profile/ endpointi permission talab qilmaydi, shuning uchun
+    pending/rejected userlar uchun ham ma'lumot qaytaradi — bot shu orqali
+    "tasdiqlanmagan" holatini alohida ko'rsata oladi.
+    """
+    status, body = await request_json("GET", "/users/profile/", params={"chat_id": chat_id})
+    if status == 200 and isinstance(body, dict):
+        return body
+    return None
 
 
-import httpx
-BASE_URL = "https://pharm-backend.shaxriyorbek.uz"
-
-async def get_user_by_chat(chat_id: int):
-    """Berilgan chat_id bo‘yicha foydalanuvchini qaytaradi."""
-    url = f"{BASE_URL}/users/by-chat/{chat_id}/?chat_id={chat_id}"
-    async with httpx.AsyncClient() as client:
-        response = await client.get(url)
-
-    return response.json()
-
-async def get_all_admins(chat_id):
-    """Admin va superadmin foydalanuvchilarni qaytaradi."""
-    url = f"{BASE_URL}/users/get_all_admins/?chat_id={chat_id}"
-    async with httpx.AsyncClient() as client:
-        response = await client.get(url)
-    # JSON formatdagi list qaytaramiz
-    return response.json()
+async def get_all_admins(chat_id: int) -> list[dict[str, Any]]:
+    """Admin va superadmin foydalanuvchilarni qaytaradi (xato bo'lsa bo'sh ro'yxat)."""
+    status, body = await request_json("GET", "/users/get_all_admins/", params={"chat_id": chat_id})
+    if status == 200 and isinstance(body, list):
+        return body
+    return []

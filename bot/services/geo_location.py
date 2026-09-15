@@ -1,36 +1,21 @@
-from bot.helpers import execute
+from typing import Any, Optional
 
-# async def create_geo_location(lat, lon, video_id, user_id):
-#     """Yangi geo location yaratadi va uni qaytaradi."""
-#     query = """
-#         INSERT INTO user_geo_locations (
-#             latitude,
-#             longitude,
-#             video_id,
-#             user_id
-#         )
-#         VALUES ($1, $2, $3, $4)
-#         RETURNING *;
-#     """
-#
-#     return await execute(query, lat, lon, video_id, user_id)
+from bot.services.api import request_json
 
-import httpx
 
-BASE_URL = "https://pharm-backend.shaxriyorbek.uz"
-
-async def create_geo_location(lat, lon, video_id, chat_id):
-    """Yangi geo location yaratadi va uni qaytaradi."""
-    url = f"{BASE_URL}/users/create_geo_location/"
-
+async def create_geo_location(lat: float, lon: float, video_id: str, chat_id: int) -> Optional[dict[str, Any]]:
+    """
+    Yangi geo location yaratadi va yaratilgan yozuvni qaytaradi.
+    Backend rad etsa (403 — tasdiqlanmagan user, 400 — noto'g'ri ma'lumot,
+    tarmoq xatosi) None qaytaradi.
+    """
     payload = {
         "lat": lat,
         "lon": lon,
         "video_id": video_id,
-        "chat_id": chat_id
+        "chat_id": chat_id,
     }
-
-    async with httpx.AsyncClient() as client:
-        response = await client.post(url, json=payload)
-
-    return response.json()
+    status, body = await request_json("POST", "/users/create_geo_location/", json=payload)
+    if status == 201 and isinstance(body, dict):
+        return body
+    return None
