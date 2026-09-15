@@ -21,8 +21,9 @@ Eslatma: `aiogram==3.22.0` Python 3.14 uchun wheel'lari yo'q — 3.11/3.12 ishla
 
 ```
 main.py                 Bot/Dispatcher, MemoryStorage, logging, shutdown'da httpx client yopiladi
-bot/config/env.py       BOT_TOKEN, BACKEND_URL (default prod), HTTP_TIMEOUT; DB_* legacy (ixtiyoriy)
-bot/services/api.py     Backend'ga yagona kirish: request_json() -> (status, body); tarmoq xatosi -> (0, None)
+bot/config/env.py       BOT_TOKEN, BACKEND_URL (default prod), HTTP_TIMEOUT, BOT_API_SECRET; DB_* legacy (ixtiyoriy)
+bot/services/api.py     Backend'ga yagona kirish: request_json() -> (status, body); tarmoq xatosi -> (0, None).
+                        BOT_API_SECRET bo'lsa har so'rovga `X-Bot-Secret` header qo'shiladi.
 bot/services/user.py    get_user_by_chat() (/users/profile/), get_all_admins()
 bot/services/geo_location.py  create_geo_location() (POST /users/create_geo_location/)
 bot/start_router.py     Handlerlar: /start, "📍 Joylashuv yuborish", location, video_note
@@ -47,7 +48,9 @@ bot/helpers.py, bot/config/database.py, bot/config/models.py — LEGACY: to'g'ri
 
 - Servislar **exception tashlamaydi**: muvaffaqiyatsiz bo'lsa `None`/`[]` qaytaradi; handler foydalanuvchiga
   xabar beradi. Yangi API chaqiruvlarini `bot/services/api.py::request_json` orqali yozing.
-- Backend `chat_id` ni har so'rovda talab qiladi (query param yoki body) — permission shunga asoslangan.
+- Backend `chat_id` ni har so'rovda talab qiladi (query param yoki body). Backend'da
+  `TELEGRAM_AUTH_REQUIRED=True` bo'lsa, qo'shimcha `X-Bot-Secret` header (backend `.env` dagi
+  `BOT_API_SECRET` bilan bir xil) shart — aks holda 403. Bot `.env` ga `BOT_API_SECRET` qo'ying.
 - `MemoryStorage`: bot qayta ishga tushsa FSM holati yo'qoladi; foydalanuvchi qaytadan tugmani bosadi.
 - Matnlar o'zbek tilida, `parse_mode=HTML` (default) — foydalanuvchi matnini HTML'ga qo'shsangiz escape qiling.
 - Python 3.12+ f-string ichida ichma-ich `"` ishlatmang (eski versiyalarda SyntaxError) — `display_name()` kabi

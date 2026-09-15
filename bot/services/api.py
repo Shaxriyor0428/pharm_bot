@@ -10,7 +10,7 @@ from typing import Any, Optional
 
 import httpx
 
-from bot.config.env import BACKEND_URL, HTTP_TIMEOUT
+from bot.config.env import BACKEND_URL, BOT_API_SECRET, HTTP_TIMEOUT
 
 logger = logging.getLogger(__name__)
 
@@ -20,7 +20,8 @@ _client: Optional[httpx.AsyncClient] = None
 def get_client() -> httpx.AsyncClient:
     global _client
     if _client is None or _client.is_closed:
-        _client = httpx.AsyncClient(base_url=BACKEND_URL, timeout=HTTP_TIMEOUT)
+        headers = {"X-Bot-Secret": BOT_API_SECRET} if BOT_API_SECRET else {}
+        _client = httpx.AsyncClient(base_url=BACKEND_URL, timeout=HTTP_TIMEOUT, headers=headers)
     return _client
 
 
