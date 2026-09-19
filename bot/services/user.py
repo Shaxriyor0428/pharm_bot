@@ -24,3 +24,15 @@ async def get_all_admins(chat_id: int) -> list[dict[str, Any]]:
     if status == 200 and isinstance(body, list):
         return body
     return []
+
+
+async def get_geo_recipients(chat_id: int) -> list[dict[str, Any]]:
+    """
+    Geo yuborilganda xabar oladiganlar: adminlar + superadminlar + shu xodimning viloyatiga
+    javob beradigan menejerlar (backend `GET /users/geo_recipients/`).
+    Eski backend'da endpoint bo'lmasa (404) yoki xato bo'lsa — faqat adminlar (get_all_admins).
+    """
+    status, body = await request_json("GET", "/users/geo_recipients/", params={"chat_id": chat_id})
+    if status == 200 and isinstance(body, list):
+        return body
+    return await get_all_admins(chat_id)

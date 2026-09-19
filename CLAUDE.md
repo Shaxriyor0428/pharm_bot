@@ -55,3 +55,10 @@ bot/helpers.py, bot/config/database.py, bot/config/models.py — LEGACY: to'g'ri
 - Matnlar o'zbek tilida, `parse_mode=HTML` (default) — foydalanuvchi matnini HTML'ga qo'shsangiz escape qiling.
 - Python 3.12+ f-string ichida ichma-ich `"` ishlatmang (eski versiyalarda SyntaxError) — `display_name()` kabi
   oldindan o'zgaruvchiga yig'ing.
+
+## 2026-09 o'zgarishlari
+
+- Geo saqlangach xabar `GET /users/geo_recipients/` ro'yxatiga yuboriladi: adminlar + xodim viloyatiga javob
+  beradigan menejerlar (`bot/services/user.py::get_geo_recipients`). Eski backend'da (404) `get_all_admins` ga qaytadi.
+- Foydalanuvchiga javob matni «Kundalik vizit» bo'limiga yo'naltiradi (izoh majburiy).
+- `display_name` HTML'ga `html.escape` bilan qo'yiladi.
