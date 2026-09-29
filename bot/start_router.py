@@ -4,6 +4,7 @@ import logging
 from aiogram import Bot, F, Router, types
 from aiogram.filters import Command
 from aiogram.fsm.context import FSMContext
+from aiogram.types import ReplyKeyboardRemove
 
 from bot.keyboard import user_menu_keyboard
 from bot.services.geo_location import create_geo_location
@@ -16,6 +17,20 @@ router = Router()
 
 NOT_REGISTERED_TEXT = "Iltimos avval web app orqali ro'yxatdan o'ting 👇"
 NOT_ACCEPTED_TEXT = "⏳ So'rovingiz hali admin tomonidan tasdiqlanmagan. Iltimos, kuting."
+# Ishlamaydigan xodim (admin «Bekor qilingan» qilgan) — "kuting" emas, tugma ham olib tashlanadi
+REJECTED_TEXT = "⛔️ Akkauntingiz faol emas (bekor qilingan). Savol bo'lsa rahbariyatga murojaat qiling."
+
+
+def access_denied_text(user: dict | None) -> str | None:
+    """Geo yubora olmaydigan foydalanuvchi uchun javob matni; ruxsat bo'lsa None."""
+    if not user:
+        return NOT_REGISTERED_TEXT
+    status = user.get("status")
+    if status == "rejected":
+        return REJECTED_TEXT
+    if status != "accepted":
+        return NOT_ACCEPTED_TEXT
+    return None
 
 
 def display_name(user: dict) -> str:
@@ -30,12 +45,9 @@ def display_name(user: dict) -> str:
 async def start_handler(message: types.Message, state: FSMContext):
     await state.clear()
 
-    user = await get_user_by_chat(message.chat.id)
-    if not user:
-        return await message.answer(NOT_REGISTERED_TEXT)
-
-    if user.get("status") != "accepted":
-        return await message.answer(NOT_ACCEPTED_TEXT)
+    denied = access_denied_text(await get_user_by_chat(message.chat.id))
+    if denied:
+        return await message.answer(denied, reply_markup=ReplyKeyboardRemove())
 
     return await message.answer(
         "Manzilingizni yuborish uchun quyidagi tugmadan foydalaning 👇",
@@ -45,6 +57,11 @@ async def start_handler(message: types.Message, state: FSMContext):
 
 @router.message(F.text == "📍 Joylashuv yuborish")
 async def start_geo_collection(message: types.Message, state: FSMContext):
+    # Tugma avvaldan qolgan bo'lishi mumkin — xodim keyin bekor qilingan/o'chirilgan bo'lsa geo so'ralmaydi
+    denied = access_denied_text(await get_user_by_chat(message.chat.id))
+    if denied:
+        await state.clear()
+        return await message.answer(denied, reply_markup=ReplyKeyboardRemove())
     await message.answer("Iltimos, live location yuboring 📍")
     await state.set_state(GeoVideoState.waiting_for_location)
 

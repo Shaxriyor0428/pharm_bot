@@ -37,7 +37,9 @@ bot/helpers.py, bot/config/database.py, bot/config/models.py — LEGACY: to'g'ri
 ## Oqim
 
 1. `/start` → `GET /users/profile/?chat_id=` : yo'q → "web app orqali ro'yxatdan o'ting";
-   `status != accepted` → "tasdiqlanmagan"; aks holda tugma.
+   `rejected` (ishlamaydigan xodim) → "akkauntingiz faol emas", `pending` → "tasdiqlanmagan" (ikkalasida tugma olib
+   tashlanadi — `ReplyKeyboardRemove`); aks holda tugma. "📍 Joylashuv yuborish" bosilganda ham holat qayta tekshiriladi
+   (`access_denied_text`) — xodim keyin bekor qilingan/o'chirilgan bo'lsa geo so'ralmaydi.
 2. Tugma → `waiting_for_location`. Faqat **live** location qabul qilinadi (`live_period` bor).
 3. `waiting_for_video` → faqat `video_note`. `POST /users/create_geo_location/` 201 bo'lsa "saqlandi",
    aks holda xato xabari (backend 403 = user tasdiqlanmagan).
