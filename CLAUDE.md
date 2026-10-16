@@ -14,7 +14,8 @@ cp .env.example .env        # BOT_TOKEN majburiy; BACKEND_URL ixtiyoriy
 python main.py
 ```
 
-Tekshiruv: `python -m py_compile main.py bot/*.py bot/**/*.py`. Testlar yo'q.
+Tekshiruv: `python -m py_compile main.py bot/*.py bot/**/*.py`. Repo'da testlar yo'q (handlerlar aiogram
+Dispatcher.feed_update + soxta session bilan tekshiriladi — Bot API'ga ulanmasdan).
 Eslatma: `aiogram==3.22.0` Python 3.14 uchun wheel'lari yo'q — 3.11/3.12 ishlating.
 
 ## Tuzilma
@@ -40,8 +41,12 @@ bot/helpers.py, bot/config/database.py, bot/config/models.py — LEGACY: to'g'ri
    `rejected` (ishlamaydigan xodim) → "akkauntingiz faol emas", `pending` → "tasdiqlanmagan" (ikkalasida tugma olib
    tashlanadi — `ReplyKeyboardRemove`); aks holda tugma. "📍 Joylashuv yuborish" bosilganda ham holat qayta tekshiriladi
    (`access_denied_text`) — xodim keyin bekor qilingan/o'chirilgan bo'lsa geo so'ralmaydi.
-2. Tugma → `waiting_for_location`. Faqat **live** location qabul qilinadi (`live_period` bor).
-3. `waiting_for_video` → faqat `video_note`. `POST /users/create_geo_location/` 201 bo'lsa "saqlandi",
+2. Tugma → `waiting_for_location` + batafsil ko'rsatma (`LIVE_HELP`: 📎 → Joylashuv → «Jonli joylashuvni ulashish»).
+   Bot tugmasi (`request_location`) faqat ODDIY joylashuv yuboradi — jonli joylashuvni Telegram faqat 📎 menyusidan beradi.
+   **Jonli joylashuv istalgan holatda qabul qilinadi** (`F.location` handler; tugmani bosmasdan yuborilsa ham — avval bot
+   jim turardi, mijoz shikoyati 2026-10-16). Faqat **live** (`live_period` bor); oddiy va **forward** qilingan joylashuv rad
+   etiladi (ko'rsatma bilan). Joylashuvsiz (yoki bot qayta ishga tushib holat yo'qolgan) `video_note` — "avval joylashuv".
+3. `waiting_for_video` → faqat `video_note` (oddiy video — "dumaloq video kerak", `VIDEO_HELP`). "Keldi" = geo + video saqlangach. `POST /users/create_geo_location/` 201 bo'lsa "saqlandi",
    aks holda xato xabari (backend 403 = user tasdiqlanmagan).
 4. `GET /users/get_all_admins/` → har bir adminga `send_message` + `send_video_note` + `send_location`;
    bitta admin xato bersa (botni start qilmagan) qolganlarga davom etadi.
